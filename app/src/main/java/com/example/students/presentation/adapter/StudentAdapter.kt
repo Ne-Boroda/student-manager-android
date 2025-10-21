@@ -1,8 +1,9 @@
-package com.example.students
+package com.example.students.presentation.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.students.data.Student
 import com.example.students.databinding.ItemStudentBinding
 
 class StudentAdapter(private val students: List<Student>) :

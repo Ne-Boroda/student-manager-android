@@ -1,4 +1,4 @@
-package com.example.students
+package com.example.students.data
 
 class Student (
     val name: String,
