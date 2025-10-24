@@ -5,6 +5,6 @@ import com.example.students.data.StudentRepository
 
 class GetStudentsUseCase(private val repository: StudentRepository) {
     fun execute(): List<Student> {
-        return repository.getStudents()
+        return repository.students
     }
 }
