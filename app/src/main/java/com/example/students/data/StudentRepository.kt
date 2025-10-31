@@ -10,4 +10,8 @@ class StudentRepository {
     fun addStudent(student: Student) {
         students.add(student)
     }
+
+    fun removeStudent(position: Int) {
+        students.removeAt(position)
+    }
 }
