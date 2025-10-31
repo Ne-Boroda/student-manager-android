@@ -14,4 +14,8 @@ class StudentRepository {
     fun removeStudent(position: Int) {
         students.removeAt(position)
     }
+
+    fun restoreStudent(student: Student, position: Int) {
+        students.add(position, student)
+    }
 }

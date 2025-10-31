@@ -14,7 +14,9 @@ import com.example.students.databinding.ActivityMainBinding
 import com.example.students.databinding.DialogAddStudentBinding
 import com.example.students.presentation.adapter.StudentAdapter
 import com.example.students.presentation.viewmodel.StudentViewModel
+import com.google.android.material.animation.Positioning
 import com.google.android.material.behavior.SwipeDismissBehavior
+import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -26,7 +28,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        adapter = StudentAdapter(viewModel.students)
+        adapter = StudentAdapter()
+        adapter.students = viewModel.students
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -79,11 +82,28 @@ class MainActivity : AppCompatActivity() {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
 
-                viewModel.removeStudent(position)
+                viewModel.deleteStudent(position)
                 adapter.notifyItemRemoved(position)
+
+                showUndoSnackbar(position)
             }
         })
 
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
+    }
+
+    private fun showUndoSnackbar(position: Int) {
+        val snackbar = Snackbar.make(
+            binding.root,
+            "Student deleted",
+            Snackbar.LENGTH_LONG
+        )
+
+        snackbar.setAction("UNDO") {
+            viewModel.restoreStudent()
+            adapter.notifyDataSetChanged()
+        }
+
+        snackbar.show()
     }
 }
