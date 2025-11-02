@@ -7,12 +7,13 @@ import com.example.students.domain.usecases.GetStudentsUseCase
 import com.example.students.domain.usecases.AddStudentUseCase
 import com.example.students.domain.usecases.RemoveStudentUseCase
 import com.example.students.domain.usecases.RestoreStudentUseCase
+import com.example.students.domain.usecases.UpdateStudentUseCase
 
 class StudentViewModel: ViewModel() {
     val repository = StudentRepository()
 
-    private val getStudentsUseCase = GetStudentsUseCase(repository)
     private val addStudentsUseCase = AddStudentUseCase(repository)
+    private val updateStudentUseCase = UpdateStudentUseCase(repository)
     private val removeStudentUseCase = RemoveStudentUseCase(repository)
     private val restoreStudentUseCase = RestoreStudentUseCase(repository)
 
@@ -24,11 +25,12 @@ class StudentViewModel: ViewModel() {
         addStudentsUseCase.execute(student)
     }
 
+    fun updateStudent(position: Int, student: Student) {
+        updateStudentUseCase.execute(position, student)
+    }
+
     private var recentlyDeletedStudent: Student? = null
     private var recentlyDeletedPosition: Int = -1
-
-    val deletedPosition: Int
-        get() = recentlyDeletedPosition
 
     fun deleteStudent(position: Int)
     {

@@ -28,8 +28,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        adapter = StudentAdapter()
-        adapter.students = viewModel.students
+        adapter = StudentAdapter(
+            viewModel.students,
+            onStudentClick = { position ->
+                showEditStudentDialog(position)
+            })
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -55,6 +58,38 @@ class MainActivity : AppCompatActivity() {
             if (name.isNotBlank() && age > 0) {
                 val newStudent = Student(name, age, avgGrade)
                 viewModel.addStudent(newStudent)
+                adapter.notifyDataSetChanged()
+            }
+        }
+
+        builder.setNegativeButton ("Cancel") { dialog, which ->
+            dialog.dismiss()
+        }
+
+        builder.show()
+    }
+
+    private fun showEditStudentDialog(position: Int) {
+        val builder = android.app.AlertDialog.Builder(this)
+        builder.setTitle("Edit Student")
+
+        val dialogBinding = DialogAddStudentBinding.inflate(layoutInflater)
+        builder.setView(dialogBinding.root)
+
+        val currentStudent = viewModel.students[position]
+
+        dialogBinding.nameEditText.setText(currentStudent.name)
+        dialogBinding.ageEditText.setText(currentStudent.age.toString())
+        dialogBinding.avgGradeEditText.setText(currentStudent.averageGrade.toString())
+
+        builder.setPositiveButton("Save") { dialog, which ->
+            val name = dialogBinding.nameEditText.text.toString()
+            val age = dialogBinding.ageEditText.text.toString().toIntOrNull() ?: 0
+            val avgGrade = dialogBinding.avgGradeEditText.text.toString().toDoubleOrNull() ?: 0.0
+
+            if (name.isNotBlank() && age > 0) {
+                val updatedStudent = Student(name, age, avgGrade)
+                viewModel.updateStudent(position, updatedStudent)
                 adapter.notifyDataSetChanged()
             }
         }

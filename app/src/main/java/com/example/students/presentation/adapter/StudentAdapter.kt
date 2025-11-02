@@ -6,8 +6,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.students.data.Student
 import com.example.students.databinding.ItemStudentBinding
 
-class StudentAdapter(private val students: List<Student>) :
-    RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
+class StudentAdapter(
+    private val students: List<Student>,
+    private val onStudentClick: (Int) -> Unit
+    ) : RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
 
     // 1. Метод: создание ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudentViewHolder {
@@ -16,7 +18,7 @@ class StudentAdapter(private val students: List<Student>) :
             parent,
             false
         )
-        return StudentViewHolder(binding)
+        return StudentViewHolder(binding, onStudentClick)
     }
 
     // 2. Метод: привязка данных к ViewHolder
@@ -30,13 +32,19 @@ class StudentAdapter(private val students: List<Student>) :
         return students.size
     }
 
-    class StudentViewHolder(private val binding: ItemStudentBinding):
-        RecyclerView.ViewHolder(binding.root) {
+    class StudentViewHolder(
+        private val binding: ItemStudentBinding,
+        private val onStudentClick: (Int) -> Unit
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(student: Student) {
             binding.nameText.text = student.name
             binding.ageText.text = "Age: ${student.age}"
             binding.avgGradeText.text = "Average Grade: ${student.averageGrade}"
+
+            binding.root.setOnClickListener {
+                onStudentClick(adapterPosition)
+            }
         }
     }
 }

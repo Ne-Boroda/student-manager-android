@@ -3,6 +3,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?attr/colorSurface"
     android:padding="16dp">
 
     <TextView
@@ -11,8 +12,7 @@
         android:layout_height="wrap_content"
         android:text="Student Name"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black" />
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/ageText"

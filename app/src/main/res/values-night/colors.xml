@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Темная тема - глубокие тона -->
+    <color name="background_dark">#FF121212</color>
+    <color name="surface_dark">#FF1E1E1E</color>
+    <color name="on_surface_dark">#FFFFFFFF</color>
+    <color name="primary_dark">#FF8FACC2</color>
+    <color name="secondary_dark">#FFA8C6DA</color>
+    <color name="card_dark">#FF2D2D2D</color>
+</resources>
