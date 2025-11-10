@@ -5,23 +5,29 @@ import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.students.R
-import com.example.students.data.Student
+import com.example.students.data.StudentEntity
 import com.example.students.databinding.ActivityMainBinding
 import com.example.students.databinding.DialogAddStudentBinding
 import com.example.students.presentation.adapter.StudentAdapter
 import com.example.students.presentation.viewmodel.StudentViewModel
+import com.example.students.presentation.viewmodel.StudentViewModelFactory
 import com.google.android.material.animation.Positioning
 import com.google.android.material.behavior.SwipeDismissBehavior
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: StudentAdapter
-    private val viewModel: StudentViewModel by viewModels()
+
+    private val viewModel: StudentViewModel by viewModels{
+        StudentViewModelFactory(applicationContext)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,12 +35,19 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         adapter = StudentAdapter(
-            viewModel.students,
-            onStudentClick = { position ->
-                showEditStudentDialog(position)
+            emptyList(),
+            onStudentClick = { student ->
+                showEditStudentDialog(student)
             })
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
+
+        lifecycleScope.launch {
+            viewModel.students.collect { students ->
+                adapter.students = students
+                adapter.notifyDataSetChanged()
+            }
+        }
 
         binding.fabAddStudent.setOnClickListener {
             showAddStudentDialog()
@@ -56,9 +69,7 @@ class MainActivity : AppCompatActivity() {
             val avgGrade = dialogBinding.avgGradeEditText.text.toString().toDoubleOrNull() ?: 0.0
 
             if (name.isNotBlank() && age > 0) {
-                val newStudent = Student(name, age, avgGrade)
-                viewModel.addStudent(newStudent)
-                adapter.notifyDataSetChanged()
+                viewModel.addStudent(name, age, avgGrade)
             }
         }
 
@@ -69,18 +80,16 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
-    private fun showEditStudentDialog(position: Int) {
+    private fun showEditStudentDialog(student: StudentEntity) {
         val builder = android.app.AlertDialog.Builder(this)
         builder.setTitle("Edit Student")
 
         val dialogBinding = DialogAddStudentBinding.inflate(layoutInflater)
         builder.setView(dialogBinding.root)
 
-        val currentStudent = viewModel.students[position]
-
-        dialogBinding.nameEditText.setText(currentStudent.name)
-        dialogBinding.ageEditText.setText(currentStudent.age.toString())
-        dialogBinding.avgGradeEditText.setText(currentStudent.averageGrade.toString())
+        dialogBinding.nameEditText.setText(student.name)
+        dialogBinding.ageEditText.setText(student.age.toString())
+        dialogBinding.avgGradeEditText.setText(student.averageGrade.toString())
 
         builder.setPositiveButton("Save") { dialog, which ->
             val name = dialogBinding.nameEditText.text.toString()
@@ -88,9 +97,11 @@ class MainActivity : AppCompatActivity() {
             val avgGrade = dialogBinding.avgGradeEditText.text.toString().toDoubleOrNull() ?: 0.0
 
             if (name.isNotBlank() && age > 0) {
-                val updatedStudent = Student(name, age, avgGrade)
-                viewModel.updateStudent(position, updatedStudent)
-                adapter.notifyDataSetChanged()
+                val updatedStudent = student.copy(
+                    name = name,
+                    age = age,
+                    averageGrade = avgGrade)
+                viewModel.updateStudent(updatedStudent)
             }
         }
 
@@ -116,18 +127,18 @@ class MainActivity : AppCompatActivity() {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
+                val student = adapter.students[position]
 
-                viewModel.deleteStudent(position)
-                adapter.notifyItemRemoved(position)
+                viewModel.removeStudent(student)
 
-                showUndoSnackbar(position)
+                showUndoSnackbar(student)
             }
         })
 
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
     }
 
-    private fun showUndoSnackbar(position: Int) {
+    private fun showUndoSnackbar(student: StudentEntity) {
         val snackbar = Snackbar.make(
             binding.root,
             "Student deleted",
@@ -135,8 +146,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         snackbar.setAction("UNDO") {
-            viewModel.restoreStudent()
-            adapter.notifyDataSetChanged()
+            viewModel.addStudent(student.name, student.age, student.averageGrade)
         }
 
         snackbar.show()

@@ -1,11 +1,11 @@
 package com.example.students.domain.usecases
 
-import androidx.collection.MutableObjectList
-import com.example.students.data.Student
+import com.example.students.data.StudentEntity
 import com.example.students.data.StudentRepository
+import kotlinx.coroutines.flow.Flow
 
 class GetStudentsUseCase(private val repository: StudentRepository) {
-    fun execute(): MutableList<Student> {
+    fun execute(): Flow<List<StudentEntity>> {
         return repository.students
     }
 }

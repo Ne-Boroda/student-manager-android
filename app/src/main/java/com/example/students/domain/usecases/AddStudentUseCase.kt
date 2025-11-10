@@ -1,10 +1,10 @@
 package com.example.students.domain.usecases
 
 import com.example.students.data.StudentRepository
-import com.example.students.data.Student
+import com.example.students.data.StudentEntity
 
 class AddStudentUseCase(private val repository: StudentRepository) {
-    fun execute(student: Student) {
+    suspend fun execute(student: StudentEntity) {
         repository.addStudent(student)
     }
 }

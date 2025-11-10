@@ -1,25 +1,25 @@
 package com.example.students.data
 
-class StudentRepository {
-    val students = mutableListOf<Student>(
-        Student("Maria", 29, 7.8),
-        Student("Max", 23, 5.2),
-        Student("John", 19, 9.8)
-    )
+import android.content.Context
+import com.example.students.data.DatabaseProvider
+import kotlinx.coroutines.flow.Flow
 
-    fun addStudent(student: Student) {
-        students.add(student)
+class StudentRepository(private val context: Context) {
+    private val database = DatabaseProvider.getDatabase(context)
+    private val studentDao = database.studentDao()
+
+    val students: Flow<List<StudentEntity>>
+        get() = studentDao.getAllStudents()
+
+    suspend fun addStudent(student: StudentEntity) {
+        studentDao.insertStudent(student)
     }
 
-    fun updateStudent(position: Int, updatedStudent: Student) {
-        students[position] = updatedStudent
+    suspend fun updateStudent(student: StudentEntity) {
+        studentDao.updateStudent(student)
     }
 
-    fun removeStudent(position: Int) {
-        students.removeAt(position)
-    }
-
-    fun restoreStudent(student: Student, position: Int) {
-        students.add(position, student)
+    suspend fun removeStudent(student: StudentEntity) {
+        studentDao.deleteStudent(student)
     }
 }

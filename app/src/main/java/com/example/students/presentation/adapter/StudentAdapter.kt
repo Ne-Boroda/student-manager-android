@@ -3,12 +3,12 @@ package com.example.students.presentation.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.students.data.Student
+import com.example.students.data.StudentEntity
 import com.example.students.databinding.ItemStudentBinding
 
 class StudentAdapter(
-    private val students: List<Student>,
-    private val onStudentClick: (Int) -> Unit
+    internal var students: List<StudentEntity>,
+    private val onStudentClick: (StudentEntity) -> Unit
     ) : RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
 
     // 1. Метод: создание ViewHolder
@@ -34,16 +34,16 @@ class StudentAdapter(
 
     class StudentViewHolder(
         private val binding: ItemStudentBinding,
-        private val onStudentClick: (Int) -> Unit
+        private val onStudentClick: (StudentEntity) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(student: Student) {
+        fun bind(student: StudentEntity) {
             binding.nameText.text = student.name
             binding.ageText.text = "Age: ${student.age}"
             binding.avgGradeText.text = "Average Grade: ${student.averageGrade}"
 
             binding.root.setOnClickListener {
-                onStudentClick(adapterPosition)
+                onStudentClick(student)
             }
         }
     }

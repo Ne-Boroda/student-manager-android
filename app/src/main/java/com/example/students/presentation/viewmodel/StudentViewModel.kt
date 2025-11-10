@@ -1,51 +1,55 @@
 package com.example.students.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.students.data.Student
+import androidx.lifecycle.viewModelScope
+import com.example.students.data.StudentEntity
 import com.example.students.data.StudentRepository
 import com.example.students.domain.usecases.GetStudentsUseCase
 import com.example.students.domain.usecases.AddStudentUseCase
 import com.example.students.domain.usecases.RemoveStudentUseCase
-import com.example.students.domain.usecases.RestoreStudentUseCase
 import com.example.students.domain.usecases.UpdateStudentUseCase
+import kotlinx.coroutines.flow.SharingCommand
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class StudentViewModel: ViewModel() {
-    val repository = StudentRepository()
+class StudentViewModel(private val repository: StudentRepository): ViewModel() {
 
+    private val getStudentsUseCase = GetStudentsUseCase(repository)
     private val addStudentsUseCase = AddStudentUseCase(repository)
     private val updateStudentUseCase = UpdateStudentUseCase(repository)
     private val removeStudentUseCase = RemoveStudentUseCase(repository)
-    private val restoreStudentUseCase = RestoreStudentUseCase(repository)
 
-    val students: List<Student>
-        get() = repository.students
+    val students = getStudentsUseCase.execute()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
-    fun addStudent(student: Student)
+    fun addStudent(name: String, age: Int, averageGrade: Double)
     {
-        addStudentsUseCase.execute(student)
+        viewModelScope.launch {
+            val newStudent = StudentEntity(
+                name = name,
+                age = age,
+                averageGrade = averageGrade
+            )
+            addStudentsUseCase.execute(newStudent)
+        }
     }
 
-    fun updateStudent(position: Int, student: Student) {
-        updateStudentUseCase.execute(position, student)
+    fun updateStudent(student: StudentEntity) {
+        viewModelScope.launch {
+            updateStudentUseCase.execute(student)
+        }
     }
 
-    private var recentlyDeletedStudent: Student? = null
-    private var recentlyDeletedPosition: Int = -1
-
-    fun deleteStudent(position: Int)
+    fun removeStudent(student: StudentEntity)
     {
-        recentlyDeletedStudent = students[position]
-        recentlyDeletedPosition = position
-        removeStudentUseCase.execute(position)
-    }
-
-    fun restoreStudent() {
-        recentlyDeletedStudent?.let { student ->
-            if (recentlyDeletedPosition in 0..students.size) {
-                restoreStudentUseCase.execute(student, recentlyDeletedPosition)
-                recentlyDeletedStudent = null
-                recentlyDeletedPosition = -1
-            }
+        viewModelScope.launch {
+            removeStudentUseCase.execute(student)
         }
     }
 }
